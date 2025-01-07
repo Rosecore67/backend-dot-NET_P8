@@ -1,12 +1,5 @@
 ﻿using GpsUtil.Location;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TourGuide.Services;
 using TourGuide.Users;
-using TourGuide.Utilities;
 using TripPricer;
 
 namespace TourGuideTest
@@ -85,7 +78,8 @@ namespace TourGuideTest
             Assert.Equal(user.UserId, visitedLocation.UserId);
         }
 
-        [Fact(Skip = "Not yet implemented")]
+        //[Fact(Skip = "Not yet implemented")]
+        [Fact]
         public void GetNearbyAttractions()
         {
             _fixture.Initialize(0);

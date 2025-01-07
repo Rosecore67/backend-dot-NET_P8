@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TripPricer.Helpers;
+﻿using TripPricer.Helpers;
 
 namespace TripPricer;
 
 public class TripPricer
 {
+    private readonly object _lock = new object();
     public List<Provider> GetPrice(string apiKey, Guid attractionId, int adults, int children, int nightsStay, int rewardsPoints)
     {
         List<Provider> providers = new List<Provider>();
@@ -17,7 +13,7 @@ public class TripPricer
         // Sleep to simulate some latency
         Thread.Sleep(ThreadLocalRandom.Current.Next(1, 50));
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
             int multiple = ThreadLocalRandom.Current.Next(100, 700);
             double childrenDiscount = children / 3.0;
@@ -29,12 +25,18 @@ public class TripPricer
             }
 
             string provider;
-            do
-            {
-                provider = GetProviderName(apiKey, adults);
-            } while (providersUsed.Contains(provider));
 
-            providersUsed.Add(provider);
+            lock (_lock)
+            {
+                do
+                {
+                    provider = GetProviderName(apiKey, adults);
+                } while (providersUsed.Contains(provider));
+
+                providersUsed.Add(provider);
+            }
+
+
             providers.Add(new Provider(attractionId, provider, price));
         }
         return providers;
@@ -42,7 +44,7 @@ public class TripPricer
 
     public string GetProviderName(string apiKey, int adults)
     {
-        int multiple = ThreadLocalRandom.Current.Next(1, 10);
+        int multiple = ThreadLocalRandom.Current.Next(1, 11);
 
         return multiple switch
         {
@@ -56,6 +58,6 @@ public class TripPricer
             8 => "Dancing Waves Cruselines and Partners",
             9 => "AdventureCo",
             _ => "Cure-Your-Blues",
-        };        
+        };
     }
 }
