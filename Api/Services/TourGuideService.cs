@@ -1,6 +1,4 @@
 ﻿using GpsUtil.Location;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System.Globalization;
 using TourGuide.LibrairiesWrappers.Interfaces;
 using TourGuide.Services.Interfaces;
@@ -90,18 +88,30 @@ public class TourGuideService : ITourGuideService
         return visitedLocation;
     }
 
-    public List<Attraction> GetNearByAttractions(VisitedLocation visitedLocation)
+    public List<NearbyAttraction> GetNearByAttractions(VisitedLocation visitedLocation)
     {
-        List<Attraction> nearbyAttractions = new ();
+        RewardCentral.RewardCentral rewardCentral = new RewardCentral.RewardCentral();
+        List<NearbyAttraction> nearbyAttractions = new();
         foreach (var attraction in _gpsUtil.GetAttractions())
         {
+            var nearbyAttraction = new NearbyAttraction
+            {
+                AttractionName = attraction.AttractionName,
+                AttractionLattitude = attraction.Latitude,
+                AttractionLongitude = attraction.Longitude,
+                UserLattitude = visitedLocation.Location.Latitude,
+                UserLongitude = visitedLocation.Location.Longitude,
+                Distance = _rewardsService.GetDistance(attraction, visitedLocation.Location),
+                Reward = rewardCentral.GetAttractionRewardPoints(attraction.AttractionId, visitedLocation.UserId)
+            };
+
             if (_rewardsService.IsWithinAttractionProximity(attraction, visitedLocation.Location))
             {
-                nearbyAttractions.Add(attraction);
+                nearbyAttractions.Add(nearbyAttraction);
             }
         }
 
-        return nearbyAttractions;
+        return nearbyAttractions.OrderBy(a => a.Distance).Take(5).ToList();
     }
 
     private void AddShutDownHook()

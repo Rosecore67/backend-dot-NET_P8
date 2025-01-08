@@ -10,7 +10,7 @@ public class RewardsService : IRewardsService
     private const double StatuteMilesPerNauticalMile = 1.15077945;
     private readonly int _defaultProximityBuffer = 10;
     private int _proximityBuffer;
-    private readonly int _attractionProximityRange = 200;
+    private readonly int _attractionProximityRange = 5000;
     private readonly IGpsUtil _gpsUtil;
     private readonly IRewardCentral _rewardsCentral;
     private static int count = 0;
@@ -18,7 +18,7 @@ public class RewardsService : IRewardsService
     public RewardsService(IGpsUtil gpsUtil, IRewardCentral rewardCentral)
     {
         _gpsUtil = gpsUtil;
-        _rewardsCentral =rewardCentral;
+        _rewardsCentral = rewardCentral;
         _proximityBuffer = _defaultProximityBuffer;
     }
 
