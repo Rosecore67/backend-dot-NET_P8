@@ -12,8 +12,11 @@ public class User
     public DateTime LatestLocationTimestamp { get; set; }
     public List<VisitedLocation> VisitedLocations { get; } = new List<VisitedLocation>();
     public List<UserReward> UserRewards { get; } = new List<UserReward>();
+    //public ConcurrentBag<UserReward> UserRewards { get; } = new ConcurrentBag<UserReward>();
     public UserPreferences UserPreferences { get; set; } = new UserPreferences();
     public List<Provider> TripDeals { get; set; } = new List<Provider>();
+    private readonly object _visitedLocationsLock = new object();
+    private readonly object _userRewardsLock = new object();
 
     public User(Guid userId, string userName, string phoneNumber, string emailAddress)
     {
@@ -25,24 +28,36 @@ public class User
 
     public void AddToVisitedLocations(VisitedLocation visitedLocation)
     {
-        VisitedLocations.Add(visitedLocation);
+        lock (_visitedLocationsLock) // Verrouille les accès à VisitedLocations pour garantir la sécurité des threads
+        {
+            VisitedLocations.Add(visitedLocation);
+        }
     }
 
     public void ClearVisitedLocations()
     {
-        VisitedLocations.Clear();
+        lock (_visitedLocationsLock) // Verrouille les accès à VisitedLocations pour garantir la sécurité des threads
+        {
+            VisitedLocations.Clear();
+        }
     }
 
     public void AddUserReward(UserReward userReward)
     {
-        if (!UserRewards.Exists(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+        lock (_userRewardsLock) // Verrouille les accès à UserRewards pour garantir la sécurité des threads
         {
-            UserRewards.Add(userReward);
+            if (!UserRewards.Any(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+            {
+                UserRewards.Add(userReward);
+            }
         }
     }
 
     public VisitedLocation GetLastVisitedLocation()
     {
-        return VisitedLocations[^1];
+        lock (_visitedLocationsLock) // Verrouille les accès à VisitedLocations pour garantir la sécurité des threads
+        {
+            return VisitedLocations[^1];
+        }
     }
 }

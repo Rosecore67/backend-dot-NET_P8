@@ -32,17 +32,46 @@ public class RewardsService : IRewardsService
         _proximityBuffer = _defaultProximityBuffer;
     }
 
+    //public void CalculateRewards(User user)
+    //{
+    //    count++;
+    //    List<VisitedLocation> userLocations = user.VisitedLocations;
+    //    List<Attraction> attractions = _gpsUtil.GetAttractions();
+
+    //    foreach (var visitedLocation in userLocations)
+    //    {   
+    //        var userRewardsCopy = user.UserRewards.ToList();
+
+    //        foreach (var attraction in attractions)
+    //        {
+    //            if (!user.UserRewards.Any(r => r.Attraction.AttractionName == attraction.AttractionName))
+    //            {
+    //                if (NearAttraction(visitedLocation, attraction))
+    //                {
+    //                    lock (user.UserRewards)
+    //                    {
+    //                        user.AddUserReward(new UserReward(visitedLocation, attraction, GetRewardPoints(attraction, user)));
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+
     public void CalculateRewards(User user)
     {
         count++;
-        List<VisitedLocation> userLocations = user.VisitedLocations;
-        List<Attraction> attractions = _gpsUtil.GetAttractions();
+        // Copie des lieux visités par l'utilisateur et copie de la liste des attractions
+        var userLocationsCopy = user.VisitedLocations.ToList();
+        var attractionsCopy = _gpsUtil.GetAttractions();
 
-        foreach (var visitedLocation in userLocations)
+        foreach (var visitedLocation in userLocationsCopy)
         {
-            foreach (var attraction in attractions)
+            foreach (var attraction in attractionsCopy)
             {
-                if (!user.UserRewards.Any(r => r.Attraction.AttractionName == attraction.AttractionName))
+                // Création d'une copie des rewards de l'utilisateur
+                var userRewardsCopy = user.UserRewards.ToList();
+                if (!userRewardsCopy.Any(r => r.Attraction.AttractionName == attraction.AttractionName))
                 {
                     if (NearAttraction(visitedLocation, attraction))
                     {
@@ -52,6 +81,7 @@ public class RewardsService : IRewardsService
             }
         }
     }
+
 
     public bool IsWithinAttractionProximity(Attraction attraction, Locations location)
     {

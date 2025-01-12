@@ -42,9 +42,17 @@ public class TourGuideService : ITourGuideService
         AddShutDownHook();
     }
 
+    //public List<UserReward> GetUserRewards(User user)
+    //{
+    //    return user.UserRewards.ToList();
+    //}
+
     public List<UserReward> GetUserRewards(User user)
     {
-        return user.UserRewards;
+        lock (user.UserRewards) // Verrouille les accès à UserRewards pour garantir la sécurité des threads
+        {
+            return user.UserRewards.ToList();
+        }
     }
 
     public VisitedLocation GetUserLocation(User user)
