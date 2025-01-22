@@ -14,17 +14,19 @@ public class TourGuideService : ITourGuideService
     private readonly IGpsUtil _gpsUtil;
     private readonly IRewardsService _rewardsService;
     private readonly TripPricer.TripPricer _tripPricer;
+    private readonly IRewardCentral _rewardCentral;
     public Tracker Tracker { get; private set; }
     private readonly Dictionary<string, User> _internalUserMap = new();
     private const string TripPricerApiKey = "test-server-api-key";
     private bool _testMode = true;
 
-    public TourGuideService(ILogger<TourGuideService> logger, IGpsUtil gpsUtil, IRewardsService rewardsService, ILoggerFactory loggerFactory)
+    public TourGuideService(ILogger<TourGuideService> logger, IGpsUtil gpsUtil, IRewardsService rewardsService, ILoggerFactory loggerFactory, IRewardCentral rewardCentral)
     {
         _logger = logger;
         _tripPricer = new();
         _gpsUtil = gpsUtil;
         _rewardsService = rewardsService;
+        _rewardCentral = rewardCentral;
 
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -55,9 +57,16 @@ public class TourGuideService : ITourGuideService
         }
     }
 
-    public VisitedLocation GetUserLocation(User user)
+    //public VisitedLocation GetUserLocation(User user)
+    //{
+    //    return user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : TrackUserLocation(user);
+    //}
+
+    public async Task<VisitedLocation> GetUserLocation(User user)
     {
-        return user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : TrackUserLocation(user);
+        return user.VisitedLocations.Any()
+            ? user.GetLastVisitedLocation()
+            : await TrackUserLocation(user);
     }
 
     public User GetUser(string userName)
@@ -88,19 +97,33 @@ public class TourGuideService : ITourGuideService
         return providers;
     }
 
-    public VisitedLocation TrackUserLocation(User user)
+    //public VisitedLocation TrackUserLocation(User user)
+    //{
+    //    VisitedLocation visitedLocation = _gpsUtil.GetUserLocation(user.UserId);
+    //    user.AddToVisitedLocations(visitedLocation);
+    //    _rewardsService.CalculateRewards(user);
+    //    return visitedLocation;
+    //}
+
+    public async Task<VisitedLocation> TrackUserLocation(User user)
     {
-        VisitedLocation visitedLocation = _gpsUtil.GetUserLocation(user.UserId);
+        // Appel asynchrone à _gpsUtil.GetUserLocation
+        VisitedLocation visitedLocation = await Task.Run(() => _gpsUtil.GetUserLocation(user.UserId));
+
         user.AddToVisitedLocations(visitedLocation);
-        _rewardsService.CalculateRewards(user);
+
+        // Appel asynchrone à CalculateRewards
+        await _rewardsService.CalculateRewards(user);
+
         return visitedLocation;
     }
 
-    public List<NearbyAttraction> GetNearByAttractions(VisitedLocation visitedLocation)
+    public async Task<List<NearbyAttraction>> GetNearByAttractions(VisitedLocation visitedLocation)
     {
-        RewardCentral.RewardCentral rewardCentral = new RewardCentral.RewardCentral();
         List<NearbyAttraction> nearbyAttractions = new();
-        foreach (var attraction in _gpsUtil.GetAttractions())
+        var attractions = _gpsUtil.GetAttractions();
+
+        foreach (var attraction in attractions)
         {
             var nearbyAttraction = new NearbyAttraction
             {
@@ -110,13 +133,13 @@ public class TourGuideService : ITourGuideService
                 UserLattitude = visitedLocation.Location.Latitude,
                 UserLongitude = visitedLocation.Location.Longitude,
                 Distance = _rewardsService.GetDistance(attraction, visitedLocation.Location),
-                Reward = rewardCentral.GetAttractionRewardPoints(attraction.AttractionId, visitedLocation.UserId)
+                Reward = _rewardCentral.GetAttractionRewardPoints(attraction.AttractionId, visitedLocation.UserId)
             };
 
-            if (_rewardsService.IsWithinAttractionProximity(attraction, visitedLocation.Location))
-            {
-                nearbyAttractions.Add(nearbyAttraction);
-            }
+            //if (_rewardsService.IsWithinAttractionProximity(attraction, visitedLocation.Location))
+            //{
+            nearbyAttractions.Add(nearbyAttraction);
+            //}
         }
 
         return nearbyAttractions.OrderBy(a => a.Distance).Take(5).ToList();

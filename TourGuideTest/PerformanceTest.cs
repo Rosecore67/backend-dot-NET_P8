@@ -1,14 +1,6 @@
 ﻿using GpsUtil.Location;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TourGuide.LibrairiesWrappers.Interfaces;
-using TourGuide.Services.Interfaces;
 using TourGuide.Users;
-using TourGuide.Utilities;
 using Xunit.Abstractions;
 
 namespace TourGuideTest
@@ -45,6 +37,7 @@ namespace TourGuideTest
         }
 
         [Fact(Skip = ("Delete Skip when you want to pass the test"))]
+        //[Fact]
         public void HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
@@ -68,6 +61,7 @@ namespace TourGuideTest
         }
 
         [Fact(Skip = ("Delete Skip when you want to pass the test"))]
+        //[Fact]
         public void HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
