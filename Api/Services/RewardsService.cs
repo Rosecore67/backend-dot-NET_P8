@@ -87,7 +87,7 @@ public class RewardsService : IRewardsService
     {
         var userLocations = user.VisitedLocations.ToList();
         var attractions = _gpsUtil.GetAttractions();
-        var newUserRewards = new ConcurrentBag<UserReward>(); // Utilisation de ConcurrentBag
+        var newUserRewards = new ConcurrentBag<UserReward>(); // Utilisation de ConcurrentBag (à modifier en List)
 
         var visitedLocationTasks = new List<Task>();
         foreach (var visitedLocation in userLocations)

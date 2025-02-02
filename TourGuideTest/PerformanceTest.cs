@@ -36,8 +36,8 @@ namespace TourGuideTest
             _output = output;
         }
 
-        [Fact(Skip = ("Delete Skip when you want to pass the test"))]
-        //[Fact]
+        //[Fact(Skip = ("Delete Skip when you want to pass the test"))]
+        [Fact]
         public void HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
@@ -60,12 +60,12 @@ namespace TourGuideTest
             Assert.True(TimeSpan.FromMinutes(15).TotalSeconds >= stopWatch.Elapsed.TotalSeconds);
         }
 
-        [Fact(Skip = ("Delete Skip when you want to pass the test"))]
-        //[Fact]
-        public void HighVolumeGetRewards()
+        //[Fact(Skip = ("Delete Skip when you want to pass the test"))]
+        [Fact]
+        public async void HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
-            _fixture.Initialize(10);
+            _fixture.Initialize(10000);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -74,7 +74,8 @@ namespace TourGuideTest
             List<User> allUsers = _fixture.TourGuideService.GetAllUsers();
             allUsers.ForEach(u => u.AddToVisitedLocations(new VisitedLocation(u.UserId, attraction, DateTime.Now)));
 
-            allUsers.ForEach(u => _fixture.RewardsService.CalculateRewards(u));
+            //allUsers.ForEach(u => _fixture.RewardsService.CalculateRewards(u));
+            await Task.WhenAll(allUsers.Select(u => _fixture.RewardsService.CalculateRewards(u)));
 
             foreach (var user in allUsers)
             {
