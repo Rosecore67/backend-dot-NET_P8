@@ -17,16 +17,16 @@ jobs:
           dotnet-version: '7.0.x'
       
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore TourGuide.sln
       
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build TourGuide.sln --no-restore
       
       - name: Tests
-        run: dotnet test
+        run: dotnet test TourGuide.sln
       
       - name: Publish
-        run: dotnet publish TourGuide.sln --configuration Release --no-build --output ./publish
+        run: dotnet publish Api/TourGuide.csproj --configuration Release --no-build --output ./publish
       
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
