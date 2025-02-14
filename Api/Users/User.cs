@@ -12,7 +12,6 @@ public class User
     public DateTime LatestLocationTimestamp { get; set; }
     public List<VisitedLocation> VisitedLocations { get; } = new List<VisitedLocation>();
     public List<UserReward> UserRewards { get; } = new List<UserReward>();
-    //public ConcurrentBag<UserReward> UserRewards { get; } = new ConcurrentBag<UserReward>();
     public UserPreferences UserPreferences { get; set; } = new UserPreferences();
     public List<Provider> TripDeals { get; set; } = new List<Provider>();
     private readonly object _visitedLocationsLock = new object();

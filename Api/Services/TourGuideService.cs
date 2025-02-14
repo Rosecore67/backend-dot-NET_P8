@@ -44,11 +44,6 @@ public class TourGuideService : ITourGuideService
         AddShutDownHook();
     }
 
-    //public List<UserReward> GetUserRewards(User user)
-    //{
-    //    return user.UserRewards.ToList();
-    //}
-
     public List<UserReward> GetUserRewards(User user)
     {
         lock (user.UserRewards) // Verrouille les accès à UserRewards pour garantir la sécurité des threads
@@ -56,11 +51,6 @@ public class TourGuideService : ITourGuideService
             return user.UserRewards.ToList();
         }
     }
-
-    //public VisitedLocation GetUserLocation(User user)
-    //{
-    //    return user.VisitedLocations.Any() ? user.GetLastVisitedLocation() : TrackUserLocation(user);
-    //}
 
     public async Task<VisitedLocation> GetUserLocation(User user)
     {
@@ -97,14 +87,6 @@ public class TourGuideService : ITourGuideService
         return providers;
     }
 
-    //public VisitedLocation TrackUserLocation(User user)
-    //{
-    //    VisitedLocation visitedLocation = _gpsUtil.GetUserLocation(user.UserId);
-    //    user.AddToVisitedLocations(visitedLocation);
-    //    _rewardsService.CalculateRewards(user);
-    //    return visitedLocation;
-    //}
-
     public async Task<VisitedLocation> TrackUserLocation(User user)
     {
         // Appel asynchrone à _gpsUtil.GetUserLocation
@@ -136,10 +118,7 @@ public class TourGuideService : ITourGuideService
                 Reward = _rewardCentral.GetAttractionRewardPoints(attraction.AttractionId, visitedLocation.UserId)
             };
 
-            //if (_rewardsService.IsWithinAttractionProximity(attraction, visitedLocation.Location))
-            //{
             nearbyAttractions.Add(nearbyAttraction);
-            //}
         }
 
         return nearbyAttractions.OrderBy(a => a.Distance).Take(5).ToList();
